@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+
+#Crack Linux USER and Root Password
+
+clear #Clearing the terminal
+echo -e "Linux User and Root password cracker\n"  #ADD AN ASCII ART HERE
+
+cleanup1 () {
+  rm $PWD/.temp/.opt* &> /dev/null
+}
+
+trap_ctrlc () {
+    echo -e "\nCtrl-C caught...Performing Clean Up Thanks for Using."
+    cleanup1
+    exit 2
+}
+
+trap "trap_ctrlc" 2
+
+options-list2 () {
+
+echo -e "\e[1;93m1.   \e[1;92mAutomatically crack the system's Root password"
+echo -e "\e[1;93m2.   \e[1;92mCrack the defined USER password"
+echo -e "\e[1;93m3.   \e[1;92mProvide the 'shadow' file path\n\n"
+
+}
+
+options-selector2 () {
+
+while true;
+do
+read -p $'\e[1;4;91mSELECT ONE OF THE OPTIONS WITH THE RESPECTED NUMBER\e[0m\e[24;1;97m : ' options4
+case $options4 in
+[1]* )  opt1-1 ;exit;;
+[2]* )  opt1-2 ;exit;;
+[3]* )  opt1-3 ;exit;;
+* ) clear && options-list2 && echo -e "\e[1;92mPlease answer it with right options \n\e[0m";;
+esac
+done
+
+}
+
+opt1-1 () {
+clear #Clearing the terminal for better apperarence
+echo -e "Cracking the System ROOT password\n\n" #Add an ASCII art here
+read -p $'\e[1;91mEnter the path of the wordlist or press Enter for default wordlist\e[0m\e[24;1;97m : ' password1_list
+if [ "$password1_list" = "" ]
+  then
+       password1_list=$PWD/wordlist.txt
+       echo -e "\n\nUsing the default wordlist, Fingers Crossed :::\n\n"
+  else
+       if [ -f $password1_list ]
+         then
+             echo -e "\n\nUsing the provided wordlist, Fingers Crossed, Wait it can take a while depending on the wordlist :::\n\n"
+         else
+             echo -e "The provided file does not exist please provide another wordlist file"
+             options-list2
+             options-selector2
+       fi
+fi
+time=$(date +"%T")
+mv ~/.john/john.pot $PWD/.john.pot/$time-john.pot.bk
+
+john /etc/shadow -w=$password1_list &> $PWD/.temp/.opt1
+crack_pass1=$(awk '/root/ {print $1}' $PWD/.temp/.opt1)
+
+if [ "$crack_pass1" = "" ]
+   then
+      echo -e "Sorry the password was not cracked try another wordlist."
+      exit
+   else
+      echo -e "Congratulations the password is cracked and the password is $crack_pass1"
+      echo -e "\nUser                 Password\nroot        =        $crack_pass1" >> cracked_password.txt
+fi
+
+cleanup1
+
+}
+
+opt1-2 () {
+clear #Clearing the terminal for better apperarence
+echo -e "Cracking the defined USER password\n\n"
+
+read -p $'\e[1;91mEnter the name of the USER you want to crack password for\e[0m\e[24;1;97m : ' username1
+if [ "$username1" = "" ]
+  then
+       echo -e "\n\nNo USER name is entered going for the ROOT\n\n"
+       username1="root"
+
+fi
+
+read -p $'\e[1;91mEnter the path of the wordlist or press enter for default\e[0m\e[24;1;97m : ' password1_list_opt2
+if [ "$password1_list_opt2" = "" ]
+  then
+       password1_list_opt2=$PWD/wordlist.txt
+       echo -e "\n\nUsing the default wordlist, Fingers Crossed"
+  else
+       if [ -f $password1_list_opt2 ]
+         then
+             echo "\n\nUsing the provided wordlist, Fingers Crossed"
+         else
+             echo "The provided file does not exist please provide another wordlist file"
+             options-list2
+             options-selector2
+       fi
+fi
+
+time=$(date +"%T")
+mv ~/.john/john.pot $PWD/.john.pot/$time-john.pot.bk
+
+john /etc/shadow -w=$password1_list_opt2 &> $PWD/.temp/.opt1_2
+crack_pass2=$(awk '/'$username1'/ {print $1}' $PWD/.temp/.opt1_2)
+
+if [ "$crack_pass2" = "" ]
+   then
+      echo -e "Sorry the password was not cracked try another wordlist."
+      exit
+   else
+      echo -e "Congratulations the password is cracked and the password is $crack_pass2"
+      echo -e "\nUser                 Password\n$username1        =        $crack_pass2" >> cracked_password.txt
+fi
+
+cleanup1
+
+}
+
+opt1-3 () {
+clear #Clearing the terminal for better apperarence
+echo -e "Cracking the provided shadow file\n\n"
+
+read -p $'\e[1;91mEnter the path of the shadow file\e[0m\e[24;1;97m : ' shadow_path
+if [ -f $shadow_path ]
+ then
+    echo -e "\n\nShadow file found in path $shadow_path\n\n"
+ else
+    echo -e "The provided file does not exist\n\n"
+    options-list2
+    options-selector2
+fi
+
+read -p $'\e[1;91mEnter the path of the wordlist or press enter for default\e[0m\e[24;1;97m : ' password1_list
+if [ "$password1_list" = "" ]
+  then
+       password1_list=$PWD/wordlist.txt
+       echo -e "\n\nUsing the default wordlist, Fingers Crossed"
+  else
+       if [ -f $password1_list ]
+         then
+             echo -e "\n\nUsing the provided wordlist, Fingers Crossed"
+         else
+             echo -e "The provided file does not exist please provide another wordlist file"
+             options-list2
+             options-selector2
+       fi
+fi
+
+time=$(date +"%T")
+mv ~/.john/john.pot $PWD/.john.pot/$time-john.pot.bk &> /dev/null
+
+john $shadow_path -w=$password1_list &> $PWD/.temp/.opt1_3
+crack_pass3=$(awk '/root/ {print $1}' $PWD/.temp/.opt1_3)
+
+if [ "$crack_pass3" = "" ]
+   then
+      echo -e "Sorry the password was not cracked try another wordlist."
+      exit
+   else
+      echo -e "Congratulations the password is cracked and the password is $crack_pass3"
+      echo -e "\nUser                 Password\nroot        =        $crack_pass3" >> cracked_password.txt
+fi
+
+cleanup1
+
+}
+
+options-list2
+options-selector2
+
+
+#Copyright : ASHWIN990 , ASHWINI SAHU
