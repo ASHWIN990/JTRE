@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Command used '$1'"
+mkdir $PWD/.temp && mkdir $PWD/.john.pot > /dev/null
 
 help () {
 
