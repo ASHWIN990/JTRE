@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+#Crack SHA512 Hash
+
+clear #Clearing the terminal
+echo -e "SHA512 Hash Cracker\n"  #ADD AN ASCII ART HERE
+
+cleanup () {
+  rm $PWD/.temp/.opt* &> /dev/null
+  rm $PWD/.temp/.temp* &> /dev/null
+}
+
+trap_ctrlc () {
+    echo -e "\n\nCtrl-C caught...Performing Clean Up Thanks for Using.\n"
+    cleanup
+    exit 2
+}
+
+trap "trap_ctrlc" 2
+
+read_sha512 () {
+
+  read -p $'\e[1;91mEnter the SHA512 Hash here\e[0m\e[24;1;97m : ' sha512_1hash
+  sha512_1hash_lenght=${#sha512_1hash}
+}
+
+hash_length () {
+
+  if [ "$sha512_1hash_lenght" != "128" ]
+   then
+       echo -e "\nThe provided Hash is not an SHA512 Hash, the SHA512 hash string contains 128 character.\n"
+       read_sha512
+       hash_length
+  fi
+}
+
+wordlist_sha512 () {
+
+  read -p $'\e[1;91m\nEnter the path of the wordlist or press Enter for default wordlist\e[0m\e[24;1;97m : ' password2_list
+  if [ "$password2_list" = "" ]
+    then
+         password2_list=$PWD/wordlist.txt
+         echo -e "\n\nUsing the default wordlist, Fingers Crossed"
+    else
+         if [ -f $password2_list ]
+           then
+               echo -e "\n\nUsing the provided wordlist, Fingers Crossed, Wait it can take a while depending on the wordlist :::\n\n"
+           else
+               echo -e "The provided file does not exist please provide another wordlist file"
+               wordlist_sha512
+         fi
+  fi
+
+}
+
+cracking_sha512 () {
+
+echo "$sha512_1hash" > $PWD/.temp/.temp_sha512hash
+wordlist_sha512
+time=$(date +"%T")
+mv ~/.john/john.pot $PWD/.john.pot/$time-john.pot.bk &> /dev/null
+john --format=Raw-sha512 $PWD/.temp/.temp_sha512hash -w=$password2_list &> $PWD/.temp/.opt3
+crack_pass2=$(awk '/?/ {print $1}' $PWD/.temp/.opt3)
+
+if [ "$crack_pass2" = "" ]
+   then
+      echo -e "Sorry the password was not cracked try another wordlist."
+      exit
+   else
+      echo -e "\nCongratulations the password is cracked and the password is $crack_pass2"
+      echo -e "\nsha512 Hash                                         Password\n$sha512_1hash        =        $crack_pass2" >> cracked_password.txt
+fi
+
+
+}
+
+read_sha512
+hash_length
+cracking_sha512
+#cleanup

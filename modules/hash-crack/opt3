@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+#Crack SHA Hashes
+
+clear #Clearing the terminal
+
+banner () {
+
+cat << "EOF"
+
+   ▄▄▄▄▄    ▄  █ ██       ▄█▄    █▄▄▄▄ ██   ▄█▄    █  █▀ 
+  █     ▀▄ █   █ █ █      █▀ ▀▄  █  ▄▀ █ █  █▀ ▀▄  █▄█   
+▄  ▀▀▀▀▄   ██▀▀█ █▄▄█     █   ▀  █▀▀▌  █▄▄█ █   ▀  █▀▄   
+ ▀▄▄▄▄▀    █   █ █  █     █▄  ▄▀ █  █  █  █ █▄  ▄▀ █  █  
+              █     █     ▀███▀    █      █ ▀███▀    █   
+             ▀     █              ▀      █          ▀    
+                  ▀                     ▀                
+EOF
+}
+
+echo -e "SHA HASH cracker\n"  #ADD AN ASCII ART HERE
+
+cleanup1 () {
+  rm $PWD/.temp/.opt* &> /dev/null
+}
+
+trap_ctrlc () {
+    echo -e "\n\nCtrl-C caught...Performing Clean Up Thanks for Using.\n"
+    cleanup1
+    exit 2
+}
+
+trap "trap_ctrlc" 2
+
+options-list2 () {
+
+banner
+echo -e "\e[1;93m1.   \e[1;92mCrack SHA1 Hash"
+echo -e "\e[1;93m2.   \e[1;92mCrack SHA224 Hash"
+echo -e "\e[1;93m3.   \e[1;92mCrack SHA256 Hash"
+echo -e "\e[1;93m4.   \e[1;92mCrack SHA384 Hash"
+echo -e "\e[1;93m5.   \e[1;92mCrack SHA512 Hash\n\n"
+
+}
+
+options-selector2 () {
+
+while true;
+do
+read -p $'\e[1;4;91mSELECT ONE OF THE OPTIONS WITH THE RESPECTED NUMBER\e[0m\e[24;1;97m : ' options4
+case $options4 in
+[1]* )  echo && bash modules/hash-crack/sha1 ;exit;;
+[2]* )  echo && bash modules/hash-crack/sha224 ;exit;;
+[3]* )  echo && bash modules/hash-crack/sha256 ;exit;;
+[4]* )  echo && bash modules/hash-crack/sha384 ;exit;;
+[5]* )  echo && bash modules/hash-crack/sha512 ;exit;;
+* ) clear && options-list2 && echo -e "\e[1;92mPlease answer it with right options \n\e[0m";;
+esac
+done
+
+}
+
+options-list2
+options-selector2
+cleanup1
